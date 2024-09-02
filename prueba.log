@@ -1,0 +1,9 @@
+{ = FinSentencia
+X26 = Identificador
+= = Caracter
+35 = Numero
++ = Caracter
+100 = Numero
+; = Caracter
+} = InicioSentencia
+￿ = Caracter

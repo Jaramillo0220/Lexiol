@@ -13,11 +13,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\josea\\OneDrive\\Escritorio\\Lenguajes y Automatas I\\Lexiol\\Lexiol.csproj",
-      "projectName": "Lexiol",
-      "projectPath": "C:\\Users\\josea\\OneDrive\\Escritorio\\Lenguajes y Automatas I\\Lexiol\\Lexiol.csproj",
+      "projectUniqueName": "C:\\Users\\josea\\OneDrive\\Escritorio\\Lenguajes y Automatas I\\Lexico1\\Lexico1.csproj",
+      "projectName": "Lexico1",
+      "projectPath": "C:\\Users\\josea\\OneDrive\\Escritorio\\Lenguajes y Automatas I\\Lexico1\\Lexico1.csproj",
       "packagesPath": "C:\\Users\\josea\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\josea\\OneDrive\\Escritorio\\Lenguajes y Automatas I\\Lexiol\\obj\\",
+      "outputPath": "C:\\Users\\josea\\OneDrive\\Escritorio\\Lenguajes y Automatas I\\Lexico1\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\josea\\AppData\\Roaming\\NuGet\\NuGet.Config"
