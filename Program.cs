@@ -17,6 +17,7 @@ namespace Lexico1
                     }
                 }
             }
+
             catch (Exception e)
             {
                 Console.WriteLine("Error en el primer procesamiento: " + e.Message);

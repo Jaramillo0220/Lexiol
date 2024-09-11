@@ -40,7 +40,7 @@ namespace Lexico1
                     Console.WriteLine(name);
                     linea = 1;
                     log = new StreamWriter(name + ".log");
-                    asm = new StreamWriter("nuevoDocumento.asm");
+                    asm = new StreamWriter(name + ".asm");
                     log.AutoFlush = true;
                     asm.AutoFlush = true;
                     archivo = new StreamReader("nuevoDocumento.cpp");
@@ -205,7 +205,14 @@ namespace Lexico1
                     buffer += c;
                     archivo.Read();
                 }
+                else if (c == '>')
+                {
+                    setClasificacion(Tipos.OperadorPuntero);
+                    buffer += c;
+                    archivo.Read();
+                }
             }
+
             else if (c == '*' || c == '/' || c == '%')
             {
                 setClasificacion(Tipos.OperadorFactor);

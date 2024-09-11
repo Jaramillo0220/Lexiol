@@ -12,7 +12,7 @@ namespace Lexico1
             Identificador, Numero, Caracter, FinSentencia,
             InicioBloque, FinBloque, OperadorTernario,
             OperadorTermino, OperadorFactor, IncrementoTermino,
-            OperadorRelacional, OperadorLogico,
+            OperadorRelacional, OperadorLogico, OperadorPuntero,
             IncrementoFactor, IncrementoPuntero, Moneda
         }
 
