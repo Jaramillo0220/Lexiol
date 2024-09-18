@@ -31,6 +31,8 @@ namespace Lexico1
         }
         public Lexico(string nuevoDocumento)
         {
+            log = new StreamWriter(nuevoDocumento + ".log");
+            log.AutoFlush = true;
             if (File.Exists(nuevoDocumento))
             {
                 //Verificar extensión cpp
@@ -39,9 +41,7 @@ namespace Lexico1
                     string name = Path.GetFileNameWithoutExtension(nuevoDocumento);
                     Console.WriteLine(name);
                     linea = 1;
-                    log = new StreamWriter(name + ".log");
                     asm = new StreamWriter(name + ".asm");
-                    log.AutoFlush = true;
                     asm.AutoFlush = true;
                     archivo = new StreamReader("nuevoDocumento.cpp");
                 }
@@ -96,7 +96,12 @@ namespace Lexico1
             //------------------------------ Inicio Proyecto -------------------------------------------------            
             else if (c == '<')
             {
-                setClasificacion(Tipos.OperadorRelacional);
+                if ((c = (char)archivo.Peek()) == '=')
+                {
+                    setClasificacion(Tipos.OperadorRelacional);
+                    buffer += c;
+                    archivo.Read();
+                }
                 if ((c = (char)archivo.Peek()) == '>')
                 {
                     setClasificacion(Tipos.OperadorRelacional);
@@ -114,29 +119,24 @@ namespace Lexico1
                     archivo.Read();
                 }
             }
-            else if (c == '<')
-            {
-                setClasificacion(Tipos.OperadorRelacional);
-                if ((c = (char)archivo.Peek()) == '=')
-                {
-                    setClasificacion(Tipos.OperadorRelacional);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
             else if (c == '>')
             {
                 setClasificacion(Tipos.OperadorRelacional);
                 if ((c = (char)archivo.Peek()) == '=')
                 {
-                    setClasificacion(Tipos.OperadorRelacional);
                     buffer += c;
                     archivo.Read();
                 }
             }
-            else if (c == '>' || c == '<')
+            else if (c == '!')
             {
-                setClasificacion(Tipos.OperadorRelacional);
+                setClasificacion(Tipos.OperadorLogico);
+                if ((c = (char)archivo.Peek()) == '=')
+                {
+                    setClasificacion(Tipos.OperadorLogico);
+                    buffer += c;
+                    archivo.Read();
+                }
             }
             else if (c == '&')
             {
@@ -158,20 +158,6 @@ namespace Lexico1
                     archivo.Read();
                 }
             }
-            else if (c == '!')
-            {
-                setClasificacion(Tipos.OperadorLogico);
-                if ((c = (char)archivo.Peek()) == '!' && c == '=')
-                {
-                    setClasificacion(Tipos.OperadorLogico);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == '!')
-            {
-                setClasificacion(Tipos.OperadorLogico);
-            }
             //------------------------------ Fin Proyecto -------------------------------------------------            
             else if (char.IsDigit(c))
             {
@@ -182,9 +168,13 @@ namespace Lexico1
                     archivo.Read();
                 }
             }
-            else if (c == ';' || c == '?')
+            else if (c == ';')
             {
                 setClasificacion(Tipos.FinSentencia);
+            }
+            else if (c == '?')
+            {
+                setClasificacion(Tipos.OperadorTernario);
             }
             else if (c == '+')
             {
@@ -247,6 +237,16 @@ namespace Lexico1
                 {
                     setClasificacion(Tipos.Moneda);
                     while (char.IsDigit(c = (char)archivo.Peek()))
+                    {
+                        buffer += c;
+                        archivo.Read();
+                    }
+                    if (c == '.') // Valores fraccionarios
+                    {
+                        buffer += c;
+                        archivo.Read();
+                    }
+                    if (char.ToLower(c) == 'e') // Valores exponenciales
                     {
                         buffer += c;
                         archivo.Read();

@@ -9,7 +9,7 @@ namespace Lexico1
             try
             {
                 // Leer archivo nuevoDocumento.cpp
-                using (Lexico l = new Lexico("nuevoDocumento.cpp"))
+                using (Lexico l = new Lexico())
                 {
                     while (!l.finArchivo())
                     {

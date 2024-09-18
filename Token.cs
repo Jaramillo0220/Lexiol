@@ -13,7 +13,8 @@ namespace Lexico1
             InicioBloque, FinBloque, OperadorTernario,
             OperadorTermino, OperadorFactor, IncrementoTermino,
             OperadorRelacional, OperadorLogico, OperadorPuntero,
-            IncrementoFactor, IncrementoPuntero, Moneda
+            IncrementoFactor, IncrementoPuntero, Moneda,
+            Cadena
         }
 
         private string contenido;

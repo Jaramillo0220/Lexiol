@@ -1,14 +1,16 @@
+} = FinBloque
 && = OperadorLogico
 & = Caracter
 || = OperadorLogico
 | = Caracter
 ! = OperadorLogico
-! = OperadorLogico
+!= = OperadorLogico
 == = OperadorRelacional
-= = OperadorTermino
 < = OperadorRelacional
 < = OperadorRelacional
 <> = OperadorRelacional
 > = OperadorRelacional
 > = OperadorRelacional
-El archivo 'nuevoDocumento' tiene 3 líneas.
+} = FinBloque
+>= = OperadorRelacional
+El archivo 'nuevoDocumento' tiene 4 líneas.
