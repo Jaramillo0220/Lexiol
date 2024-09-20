@@ -54,12 +54,10 @@ namespace Lexico1
         public void Dispose()
         {
             // Definir la ruta del archivo
-            string nuevoDocumento = "nuevoDocumento.cpp";
-
+            string prueba = "prueba.cpp";
             //Lector lineas
-            string[] lineas = File.ReadAllLines(nuevoDocumento);
-            log.WriteLine("El archivo 'nuevoDocumento' tiene " + lineas.Length + " líneas.");
-
+            string[] lineas = File.ReadAllLines(prueba);
+            log.WriteLine("El archivo 'prueba' tiene " + lineas.Length + " líneas.");
             archivo.Close();
             log.Close();
             asm.Close();
@@ -71,9 +69,12 @@ namespace Lexico1
             char c;
             string buffer = "";
 
-
-            while (char.IsWhiteSpace(c = (char)archivo.Read()))
+            while (char.IsWhiteSpace(c = (char)archivo.Read()))     // Contador de líneas
             {
+                if (c == '\n')
+                {
+                    linea++;                                        // Parte del proyecto 2
+                }
             }
             buffer += c;
             if (char.IsLetter(c))
@@ -85,7 +86,112 @@ namespace Lexico1
                     archivo.Read();
                 }
             }
-            else if (c == '{')
+            //--------------------INICIO DE PROYECTO--------------------
+            //----------INICIO----------NUMERO----------
+            else if (char.IsDigit(c))
+            {
+                setClasificacion(Tipos.Numero);
+                while (char.IsDigit(c = (char)archivo.Peek()))                      //Guarda todos los valores
+                {                                                                   //tipo char en el buffer
+                    buffer += c;
+                    archivo.Read();
+                }
+                if (c == '.')                                                       //Parte Fraccional //Toma al punto y lo registra de igual
+                {                                                                   //forma en el buffer
+                    buffer += c;
+                    archivo.Read();
+                    c = (char)archivo.Peek();                                       //Sigue leyendo el documento para validar que sigue
+                    if (!char.IsDigit(c))                                           //Si char no es digito entonces
+                    {                                                               //muestra el mensagge error y cerramos el proceso
+                        log.WriteLine($"Error léxico en la línea {linea}: Se esperaba un dígito después del punto decimal.");
+                        return;
+                    }
+                    else                                                            //Si char si es digito entonces termina la lectura y
+                    {                                                               //registra en el buffer
+                        while (char.IsDigit(c = (char)archivo.Peek()))
+                        {
+                            buffer += c;
+                            archivo.Read();
+                        }
+                    }
+                }
+                if (c == 'e')                                                       //Parte Exponencial //Toma al punto y lo registra de igual
+                {                                                                   //forma en el buffer
+                    buffer += c;
+                    archivo.Read();
+                    if ((c = (char)archivo.Peek()) == '+' || (c = (char)archivo.Peek()) == '-' || char.IsDigit(c = (char)archivo.Peek()))
+                    {
+
+                        buffer += c;
+                        archivo.Read();
+                        if ((char.IsDigit(c = (char)archivo.Peek())))
+                        {
+                            while (char.IsDigit(c = (char)archivo.Peek()))
+                            {
+                                buffer += c;
+                                archivo.Read();
+                            }
+                        }
+                        else
+                        {                                                               //muestra el mensagge error y cerramos el proceso
+                            log.WriteLine($"Error léxico en la línea {linea}: Se esperaba un dígito después del punto decimal.");
+                            return;
+                        }
+                    }
+                    else
+                    {                                                               //muestra el mensagge error y cerramos el proceso
+                        log.WriteLine($"Error léxico en la línea {linea}: Se esperaba un dígito después del punto decimal.");
+                        return;
+                    }
+                }
+            }
+            //----------FIN----------NUMERO----------
+
+            //----------INICIO----------CADENA----------
+            else if (c == '"')
+            {
+                setClasificacion(Tipos.Cadena);
+                while ((c = (char)archivo.Peek()) != '"' && (!finArchivo()))                     //Guarda todos los valores
+                {                                                                   //tipo char en el buffer
+                    buffer += c;
+                    archivo.Read();
+                }
+                if (!finArchivo())
+                    buffer += c;
+                archivo.Read();
+            }
+            //----------FIN----------CADENA----------
+
+            //----------INICIO----------CARACTER----------
+            else if (c == '\'')
+            {
+                setClasificacion(Tipos.Caracter);
+                if ((c = (char)archivo.Peek()) != '\'')                     //Guarda todos los valores
+                {                                                                   //tipo char en el buffer
+                    buffer += c;
+                    archivo.Read();
+                    if (finArchivo())
+                    {
+                        if ((c == '\''))
+                        {
+                            setClasificacion(Tipos.Caracter);
+                            buffer += c;
+                            archivo.Read();
+                            c = (char)archivo.Peek();
+                        }
+                        else
+                        {
+                            log.WriteLine($"Error léxico en la línea {linea}: Se esperaba finalizar con una comilla.");
+                            return;
+                        }
+                    }
+                }
+                buffer += c;
+                archivo.Read();
+            }
+            //----------FIN----------CARACTER----------
+            //--------------------FIN DE PROYECTO--------------------
+            /*else if (c == '{')
             {
                 setClasificacion(Tipos.InicioBloque);
             }
@@ -93,7 +199,6 @@ namespace Lexico1
             {
                 setClasificacion(Tipos.FinBloque);
             }
-            //------------------------------ Inicio Proyecto -------------------------------------------------            
             else if (c == '<')
             {
                 if ((c = (char)archivo.Peek()) == '=')
@@ -158,7 +263,6 @@ namespace Lexico1
                     archivo.Read();
                 }
             }
-            //------------------------------ Fin Proyecto -------------------------------------------------            
             else if (char.IsDigit(c))
             {
                 setClasificacion(Tipos.Numero);
@@ -241,18 +345,8 @@ namespace Lexico1
                         buffer += c;
                         archivo.Read();
                     }
-                    if (c == '.') // Valores fraccionarios
-                    {
-                        buffer += c;
-                        archivo.Read();
-                    }
-                    if (char.ToLower(c) == 'e') // Valores exponenciales
-                    {
-                        buffer += c;
-                        archivo.Read();
-                    }
                 }
-            }
+            }*/
             else
             {
                 setClasificacion(Tipos.Caracter);

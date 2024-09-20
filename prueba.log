@@ -1,16 +1,13 @@
-} = FinBloque
-&& = OperadorLogico
-& = Caracter
-|| = OperadorLogico
-| = Caracter
-! = OperadorLogico
-!= = OperadorLogico
-== = OperadorRelacional
-< = OperadorRelacional
-< = OperadorRelacional
-<> = OperadorRelacional
-> = OperadorRelacional
-> = OperadorRelacional
-} = FinBloque
->= = OperadorRelacional
-El archivo 'nuevoDocumento' tiene 4 líneas.
+5555 = Numero
+5555.5555 = Numero
+Error léxico en la línea 3: Se esperaba un dígito después del punto decimal.
+333 = Numero
+3333e333 = Numero
+Error léxico en la línea 6: Se esperaba un dígito después del punto decimal.
+123 = Numero
+123.321e654 = Numero
+123.321e+654 = Numero
+123.321e-654 = Numero
+Error léxico en la línea 11: Se esperaba un dígito después del punto decimal.
+"Hola a todos mi nombre es Jose" = Cadena
+El archivo 'prueba' tiene 18 líneas.
