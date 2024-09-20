@@ -172,21 +172,56 @@ namespace Lexico1
             //----------FIN----------CADENA----------
 
             //----------INICIO----------CARACTER----------
-            else if (c == '\'')
+            else if (c == '#')
             {
-                setClasificacion(Tipos.Cadena);
-                if ((c = (char)archivo.Peek()) != '\'')                     //Guarda todos los valores
+                setClasificacion(Tipos.Caracter);
+                while (char.IsDigit(c = (char)archivo.Peek()))                      //Guarda todos los valores
                 {                                                                   //tipo char en el buffer
                     buffer += c;
                     archivo.Read();
-                    if ((c = (char)archivo.Peek()) != '\'')                     //Guarda todos los valores
+                }
+            }
+            else if (c == '@')
+            {
+                setClasificacion(Tipos.Caracter);
+                archivo.Read();
+            }
+            else if (c == '\'')
+            {
+                setClasificacion(Tipos.Caracter);
+                if ((c = (char)archivo.Peek()) == '\'')                     //Guarda todos los valores
+                {                                                                   //tipo char en el buffer
+                    buffer += c;
+                    archivo.Read();
+                    if ((c = (char)archivo.Peek()) == '\'')                     //Guarda todos los valores
                     {
-                        log.WriteLine($"Error léxico en la línea {linea}: Se esperaba finalizar con una comilla.");
+                        buffer += c;
+                        archivo.Read();
+                        setClasificacion(Tipos.Caracter);
+                    }
+                    else
+                    {
+                        log.WriteLine($"Error léxico en la línea {linea}: Se esperaba finalizar con una comilla simple.");
                         return;
                     }
                 }
-                buffer += c;
-                archivo.Read();
+                else
+                {
+                    buffer += c;
+                    archivo.Read();
+                    if ((c = (char)archivo.Peek()) == '\'')                     //Guarda todos los valores
+                    {
+                        buffer += c;
+                        archivo.Read();
+                        setClasificacion(Tipos.Caracter);
+                    }
+                    else
+                    {
+                        log.WriteLine($"Error léxico en la línea {linea}: Se esperaba finalizar con una comilla simple.");
+                        return;
+                    }
+                }
+
             }
             //----------FIN----------CARACTER----------
             //--------------------FIN DE PROYECTO--------------------
