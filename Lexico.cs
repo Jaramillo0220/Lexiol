@@ -134,13 +134,13 @@ namespace Lexico1
                         }
                         else
                         {                                                               //muestra el mensagge error y cerramos el proceso
-                            log.WriteLine($"Error léxico en la línea {linea}: Se esperaba un dígito después del punto decimal.");
+                            log.WriteLine($"Error léxico en la línea {linea}: Se esperaba un exponente después de la e.");
                             return;
                         }
                     }
                     else
                     {                                                               //muestra el mensagge error y cerramos el proceso
-                        log.WriteLine($"Error léxico en la línea {linea}: Se esperaba un dígito después del punto decimal.");
+                        log.WriteLine($"Error léxico en la línea {linea}: Se esperaba un exponente después de la e.");
                         return;
                     }
                 }
@@ -151,13 +151,22 @@ namespace Lexico1
             else if (c == '"')
             {
                 setClasificacion(Tipos.Cadena);
-                while ((c = (char)archivo.Peek()) != '"' && (!finArchivo()))                     //Guarda todos los valores
-                {                                                                   //tipo char en el buffer
+                while (((c = (char)archivo.Peek()) != '"') && c != '\n')
+                {
                     buffer += c;
                     archivo.Read();
+                    if (((c = (char)archivo.Peek()) != '"') && c == '\n')
+                    {
+                        log.WriteLine($"Error léxico en la línea {linea}: Se esperaba finalizar con comillas.");
+                        return;
+                    }
+                    else
+                    {
+                        buffer += c;
+                        archivo.Read();
+                    }
                 }
-                if (!finArchivo())
-                    buffer += c;
+                buffer += c;
                 archivo.Read();
             }
             //----------FIN----------CADENA----------
@@ -165,25 +174,15 @@ namespace Lexico1
             //----------INICIO----------CARACTER----------
             else if (c == '\'')
             {
-                setClasificacion(Tipos.Caracter);
+                setClasificacion(Tipos.Cadena);
                 if ((c = (char)archivo.Peek()) != '\'')                     //Guarda todos los valores
                 {                                                                   //tipo char en el buffer
                     buffer += c;
                     archivo.Read();
-                    if (finArchivo())
+                    if ((c = (char)archivo.Peek()) != '\'')                     //Guarda todos los valores
                     {
-                        if ((c == '\''))
-                        {
-                            setClasificacion(Tipos.Caracter);
-                            buffer += c;
-                            archivo.Read();
-                            c = (char)archivo.Peek();
-                        }
-                        else
-                        {
-                            log.WriteLine($"Error léxico en la línea {linea}: Se esperaba finalizar con una comilla.");
-                            return;
-                        }
+                        log.WriteLine($"Error léxico en la línea {linea}: Se esperaba finalizar con una comilla.");
+                        return;
                     }
                 }
                 buffer += c;

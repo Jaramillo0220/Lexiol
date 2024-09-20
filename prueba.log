@@ -1,13 +1,19 @@
 5555 = Numero
-5555.5555 = Numero
-Error léxico en la línea 3: Se esperaba un dígito después del punto decimal.
+5555.5577 = Numero
+. = Caracter
 333 = Numero
 3333e333 = Numero
-Error léxico en la línea 6: Se esperaba un dígito después del punto decimal.
+Error léxico en la línea 4: Se esperaba un exponente después de la e.
 123 = Numero
 123.321e654 = Numero
 123.321e+654 = Numero
 123.321e-654 = Numero
-Error léxico en la línea 11: Se esperaba un dígito después del punto decimal.
+Error léxico en la línea 9: Se esperaba un exponente después de la e.
 "Hola a todos mi nombre es Jose" = Cadena
-El archivo 'prueba' tiene 18 líneas.
+Error léxico en la línea 11: Se esperaba finalizar con comillas.
+'H' = Cadena
+Error léxico en la línea 13: Se esperaba finalizar con una comilla.
+"" = Cadena
+'' = Cadena
+Error léxico en la línea 15: Se esperaba finalizar con una comilla.
+El archivo 'prueba' tiene 15 líneas.
