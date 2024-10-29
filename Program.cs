@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace Lexico1
+namespace Lexico_3
 {
     class Program
     {
@@ -8,34 +11,19 @@ namespace Lexico1
         {
             try
             {
-                // Leer archivo nuevoDocumento.cpp
-                using (Lexico l = new Lexico())
+                using (Lexico lexico = new Lexico())
                 {
-                    while (!l.finArchivo())
+                    while (!lexico.finArchivo())
                     {
-                        l.nextToken();
+                        lexico.nextToken();
                     }
-                }
-            }
-
-            catch (Exception e)
-            {
-                Console.WriteLine("Error en el primer procesamiento: " + e.Message);
-            }
-
-            try
-            {
-                using (Lexico l = new Lexico("prueba.cpp"))
-                {
-                    while (!l.finArchivo())
-                    {
-                        l.nextToken();
-                    }
+                    lexico.log.WriteLine("\n-----------------------------------\n");
+                    lexico.log.WriteLine("Líneas del archivo: " + lexico.linea);
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine("Error en el segundo procesamiento: " + e.Message);
+                Console.WriteLine("Error: " + e.Message);
             }
         }
     }

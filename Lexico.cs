@@ -1,22 +1,79 @@
+
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.IO;
-using Microsoft.VisualBasic;
+using System.Data; // Para DataSet
+using ExcelDataReader; // Para ExcelDataReader
+using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 
-
-namespace Lexico1
+namespace Lexico_3
 {
     public class Lexico : Token, IDisposable
     {
-        StreamReader archivo;
-        StreamWriter log;
-        StreamWriter asm;
-        int linea;
-        public Lexico()
+        public StreamReader archivo;
+        public StreamWriter log;
+        public StreamWriter asm;
+        public int linea = 1;
+        const int F = -1;
+
+        const int E = -2;
+
+        int[,] TRAND = {
+            {0, 1, 2, 33, 1, 12, 14, 8, 9, 10, 11, 23, 16, 16, 18, 20, 21, 26, 25, 27, 29, 32, 34, 0, F, 33},
+            {F, 1, 1, F,  1, F,  F,  F, F, F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F, F, F },
+            {F, F, 2, 3,  5, F,  F,  F, F, F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F, F, F },
+            {E, E, 4, E,  E, E,  E,  E, E, E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E, E, E },
+            {F, F, 4, 5,  F, F,  F,  F, F, F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F, F, F },
+            {E, E, 7, E,  E, 6,  6,  E, E, E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E, E, E },
+            {E, E, 7, E,  E, E,  E,  E, E, E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E,  E, E, E },
+            {F, F, 7, F,  F, F,  F,  F, F, F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F, F, F },
+            {F, F, F, F,  F, F,  F,  F, F, F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F, F, F },
+            {F, F, F, F,  F, F,  F,  F, F, F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F, F, F },
+            {F, F, F, F,  F, F,  F,  F, F, F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F, F, F },
+            {F, F, F, F,  F, F,  F,  F, F, F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F,  F, F, F },
+            {F, F, F, F, F, 13, F, F, F, F, F, 13, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, 13, F, F, F, F, F, F, 15, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, 17, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, 19, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, 19, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, 22, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, 24, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, 24, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, 24, F, F, F, F, F, F, 24, F, F, F, F, F, F, F},
+            {27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 27, 28, 27, 27, 27, 27, E, 27},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30},
+            {E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, E, 31, E, E, E, E, E},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, 32, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F, F},
+            {F, F, F, F, F, F, F, F, F, F, F, 17, 36, F, F, F, F, F, F, F, F, F, 35, F, F, F},
+            {35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 0, 35, 35},
+            {36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 37, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36},
+            {36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 36, 37, 36, 36, 36, 36, 36, 36, 36, 36, 36, 0, 36, 36, 36},
+            };
+
+        // Booleano para seleccionar entre TRAND o matrizExcel
+        private int[,] matrizExcel; // Declaración de matrizExcel
+        public bool usarMatrizInterna;
+
+        public Lexico(bool usarMatrizInterna = true)
         {
-            linea = 1;
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+            this.usarMatrizInterna = usarMatrizInterna;
+            if (!usarMatrizInterna)
+            {
+                LeerExcelMatriz("/mnt/data/TRAND.xlsx");
+            }
+
             log = new StreamWriter("prueba.log");
             asm = new StreamWriter("prueba.asm");
             log.AutoFlush = true;
@@ -30,387 +87,295 @@ namespace Lexico1
                 throw new Error("El archivo prueba.cpp no existe", log);
             }
         }
-        public Lexico(string nuevoDocumento)
+
+        private void LeerExcelMatriz(string path)
         {
-            log = new StreamWriter(nuevoDocumento + ".log");
-            log.AutoFlush = true;
-            if (File.Exists(nuevoDocumento))
+            try
             {
-                //Verificar extensión cpp
-                if (Path.GetExtension(nuevoDocumento) == ".cpp")
+                using (var stream = File.Open(path, FileMode.Open, FileAccess.Read))
                 {
-                    string name = Path.GetFileNameWithoutExtension(nuevoDocumento);
-                    Console.WriteLine(name);
-                    linea = 1;
-                    asm = new StreamWriter(name + ".asm");
-                    asm.AutoFlush = true;
-                    archivo = new StreamReader("nuevoDocumento.cpp");
+                    using (var reader = ExcelReaderFactory.CreateReader(stream))
+                    {
+                        var result = reader.AsDataSet();
+                        var sheet = result.Tables[0];
+
+                        if (sheet.Rows.Count < 38 || sheet.Columns.Count < 27)
+                        {
+                            throw new Exception("La matriz en el archivo Excel no tiene las dimensiones correctas (38x27).");
+                        }
+
+                        matrizExcel = new int[38, 27];
+
+                        for (int i = 0; i < 38; i++)
+                        {
+                            for (int j = 0; j < 27; j++)
+                            {
+                                var cellValue = sheet.Rows[i][j].ToString();
+                                matrizExcel[i, j] = cellValue == "F" ? -1 : cellValue == "E" ? -2 : Convert.ToInt32(cellValue);
+                            }
+                        }
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Error al leer el archivo Excel: " + ex.Message);
+            }
+        }
+
+        private int ObtenerEstado(int estado, int columna)
+        {
+            if (!usarMatrizInterna && matrizExcel == null)
+            {
+                throw new Exception("La matrizExcel no está inicializada.");
+            }
+
+            return usarMatrizInterna ? TRAND[estado, columna] : matrizExcel[estado, columna];
+        }
+
+        public Lexico()
+        {
+            log = new StreamWriter("prueba.log");
+            asm = new StreamWriter("prueba.asm");
+            log.AutoFlush = true;
+            asm.AutoFlush = true;
+            if (File.Exists("prueba.cpp"))
+            {
+                archivo = new StreamReader("prueba.cpp");
             }
             else
             {
-                throw new Error("El archivo nuevoDocumento.cpp no existe", log);
+                throw new Error("El archivo prueba.cpp no existe", log);
+            }
+        }
+
+        public Lexico(string nombreArchivo)
+        {
+            string nombreArchivoWithoutExt = Path.GetFileNameWithoutExtension(nombreArchivo);   /* Obtenemos el nombre del archivo sin la extensión para poder crear el .log y .asm */
+            if (File.Exists(nombreArchivo))
+            {
+                log = new StreamWriter(nombreArchivoWithoutExt + ".log");
+                asm = new StreamWriter(nombreArchivoWithoutExt + ".asm");
+                log.AutoFlush = true;
+                asm.AutoFlush = true;
+                archivo = new StreamReader(nombreArchivo);
+            }
+            else if (Path.GetExtension(nombreArchivo) != ".cpp")
+            {
+                throw new ArgumentException("El archivo debe ser de extensión .cpp");
+            }
+            else
+            {
+                throw new FileNotFoundException("La extensión " + Path.GetExtension(nombreArchivo) + " no existe");    /* Defino una excepción que indica que existe un error con el archivo en caso de no ser encontrado */
             }
         }
         public void Dispose()
         {
-            // Definir la ruta del archivo
-            string prueba = "prueba.cpp";
-            //Lector lineas
-            string[] lineas = File.ReadAllLines(prueba);
-            log.WriteLine("El archivo 'prueba' tiene " + (lineas.Length) + " líneas.");
             archivo.Close();
             log.Close();
             asm.Close();
         }
 
+        private int Columna(char c)
+        {
 
+            if (c == '\n')
+            {
+                return 23;
+            }
+            else if (finArchivo())
+            {
+                return 24;
+            }
+            else if (char.IsWhiteSpace(c))
+            {
+                return 0;
+            }
+            else if (c == 'E' || c == 'e')
+            {
+                return 4;
+            }
+            else if (char.IsLetter(c))
+            {
+                return 1;
+            }
+            else if (char.IsDigit(c))
+            {
+                return 2;
+            }
+            else if (c == '.')
+            {
+                return 2;
+            }
+            else if (c == '+')
+            {
+                return 5;
+            }
+            else if (c == '-')
+            {
+                return 6;
+            }
+            else if (c == ';')
+            {
+                return 7;
+            }
+            else if (c == '{')
+            {
+                return 8;
+            }
+            else if (c == '}')
+            {
+                return 9;
+            }
+            else if (c == '?')
+            {
+                return 10;
+            }
+            else if (c == '=')
+            {
+                return 11;
+            }
+            else if (c == '*')
+            {
+                return 12;
+            }
+            else if (c == '%')
+            {
+                return 13;
+            }
+            else if (c == '&')
+            {
+                return 14;
+            }
+            else if (c == '|')
+            {
+                return 15;
+            }
+            else if (c == '!')
+            {
+                return 16;
+            }
+            else if (c == '<')
+            {
+                return 17;
+            }
+            else if (c == '>')
+            {
+                return 18;
+            }
+            else if (c == '"')
+            {
+                return 19;
+            }
+            else if (c == '\'')
+            {
+                return 20;
+            }
+            else if (c == '#')
+            {
+                return 21;
+            }
+            else if (c == '/')
+            {
+                return 22;
+            }
+            return 25;
+        }
+        private void Clasifica(int estado)
+        {
+            switch (estado)
+            {
+                case 1: setClasificacion(Tipos.Identificador); break;
+                case 2: setClasificacion(Tipos.Numero); break;
+                case 8: setClasificacion(Tipos.FinSentencia); break;
+                case 9: setClasificacion(Tipos.InicioBloque); break;
+                case 10: setClasificacion(Tipos.FinBloque); break;
+                case 11: setClasificacion(Tipos.OperadorTernario); break;
+
+                case 12:
+                case 14: setClasificacion(Tipos.OperadorTermino); break;
+
+                case 13: setClasificacion(Tipos.IncrementoTermino); break;
+                case 15: setClasificacion(Tipos.Puntero); break;
+
+                case 34:
+                case 16: setClasificacion(Tipos.OperadorFactor); break;
+                case 17: setClasificacion(Tipos.IncrementoFactor); break;
+
+                case 18:
+                case 20:
+                case 29:
+                case 32:
+                case 33: setClasificacion(Tipos.Caracter); break;
+
+                case 19:
+                case 21: setClasificacion(Tipos.OperadorLogico); break;
+
+                case 22:
+                case 24:
+                case 25:
+                case 26: setClasificacion(Tipos.OperadorRelacional); break;
+
+                case 23: setClasificacion(Tipos.Asignacion); break;
+                case 27: setClasificacion(Tipos.Cadena); break;
+            }
+        }
         public void nextToken()
         {
             char c;
             string buffer = "";
-
-            while (char.IsWhiteSpace(c = (char)archivo.Read()))
+            int estado = 0;
+            while (estado >= 0)
             {
-                if (c == '\n')
+                c = (char)archivo.Peek();
+                estado = ObtenerEstado(estado, Columna(c));
+                Clasifica(estado);
+                if (estado >= 0)
                 {
-                    linea++;
-                }
-            }
-            buffer += c;
-            if (char.IsLetter(c))
-            {
-                setClasificacion(Tipos.Identificador);
-                while (char.IsLetterOrDigit(c = (char)archivo.Peek()))
-                {
-                    buffer += c;
                     archivo.Read();
-                }
-            }
-            //--------------------INICIO DE PROYECTO--------------------
-            //----------INICIO----------NUMERO----------
-            else if (char.IsDigit(c))
-            {
-                setClasificacion(Tipos.Numero);
-                while (char.IsDigit(c = (char)archivo.Peek()))
-                {
-                    buffer += c;
-                    archivo.Read();
-                }
-                if (c == '.')
-                {
-                    buffer += c;
-                    archivo.Read();
-                    if (!(char.IsDigit(c = (char)archivo.Peek())))
+                    if (c == '\n')
                     {
-                        throw new Error(linea + ": Se esperaba un dígito después del punto decimal.", log);
+                        linea++;
+                    }
+                    if (estado > 0)
+                    {
+                        buffer += c;
                     }
                     else
                     {
-                        while (char.IsDigit(c = (char)archivo.Peek()))
-                        {
-                            buffer += c;
-                            archivo.Read();
-                        }
-                    }
-                }
-                if (c == 'e' || c == 'E')
-                {
-                    buffer += c;
-                    archivo.Read();
-                    if ((c = (char)archivo.Peek()) == '+' || (c = (char)archivo.Peek()) == '-')
-                    {
-                        buffer += c;
-                        archivo.Read();
-                        if ((char.IsDigit(c = (char)archivo.Peek())))
-                        {
-                            buffer += c;
-                            archivo.Read();
-                            while (char.IsDigit(c = (char)archivo.Peek()))
-                            {
-                                buffer += c;
-                                archivo.Read();
-                            }
-                        }
-                        else
-                        {
-                            throw new Error(linea + ": Se esperaba un exponente después de la e.", log);
-
-                        }
-
-                    }
-                    else if ((char.IsDigit(c = (char)archivo.Peek())))
-                    {
-                        buffer += c;
-                        archivo.Read();
-                        while (char.IsDigit(c = (char)archivo.Peek()))
-                        {
-                            buffer += c;
-                            archivo.Read();
-                        }
-                    }
-                    else
-                    {
-                        throw new Error(linea + ": Se esperaba un exponente después de la e.", log);
-
+                        buffer = "";
                     }
                 }
             }
-            //----------FIN----------NUMERO----------
-
-            //----------INICIO----------CADENA----------
-            else if (c == '"')
+            if (estado == E)
             {
-                setClasificacion(Tipos.Cadena);
-                while (((c = (char)archivo.Peek()) != '"') && (!finArchivo()))
+                if (getClasificacion() == Tipos.Cadena)
                 {
-                    buffer += c;
-                    archivo.Read();
-                    if (((c = (char)archivo.Peek()) != '"') && (c == '\n'))
-                    {
-                        throw new Error(linea + ": Se esperaba finalizar con comillas.", log);
-
-                    }
-                    else
-                    {
-                        buffer += c;
-                        archivo.Read();
-                    }
+                    throw new Error("léxico, se esperaba un cierre de cadena", log, linea);
                 }
-                buffer += c;
-                archivo.Read();
-            }
-            //----------FIN----------CADENA----------
-
-            //----------INICIO----------CARACTER----------
-            else if (c == '\'')
-            {
-                setClasificacion(Tipos.Caracter);
-                if ((c = (char)archivo.Peek()) == '\'')
+                else if (getClasificacion() == Tipos.Caracter)
                 {
-                    buffer += c;
-                    archivo.Read();
-                    if ((c = (char)archivo.Peek()) == '\'')
-                    {
-                        buffer += c;
-                        archivo.Read();
-                        setClasificacion(Tipos.Caracter);
-                    }
-                    else
-                    {
-                        throw new Error(linea + ": Se esperaba finalizar con una comilla simple.", log);
-
-                    }
+                    throw new Error("léxico, se esperaba un cierre de comilla simple", log, linea);
+                }
+                else if (getClasificacion() == Tipos.Numero)
+                {
+                    throw new Error("léxico, se esperaba un dígito", log, linea);
                 }
                 else
                 {
-                    buffer += c;
-                    archivo.Read();
-                    if ((c = (char)archivo.Peek()) == '\'')
-                    {
-                        buffer += c;
-                        archivo.Read();
-                        setClasificacion(Tipos.Caracter);
-                    }
-                    else
-                    {
-                        throw new Error(linea + ": Se esperaba finalizar con una comilla simple.", log);
-
-                    }
+                    throw new Error("léxico, se espera fin de comentario", log, linea);
                 }
-
-            }
-            else if (c == '#')
-            {
-                setClasificacion(Tipos.Caracter);
-                while (char.IsDigit(c = (char)archivo.Peek()))
-                {
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == '@')
-            {
-                setClasificacion(Tipos.Caracter);
-                archivo.Read();
-            }
-
-            //----------FIN----------CARACTER----------
-            //--------------------FIN DE PROYECTO--------------------
-            /*else if (c == '{')
-            {
-                setClasificacion(Tipos.InicioBloque);
-            }
-            else if (c == '}')
-            {
-                setClasificacion(Tipos.FinBloque);
-            }
-            else if (c == '<')
-            {
-                if ((c = (char)archivo.Peek()) == '=')  
-                {
-                    setClasificacion(Tipos.OperadorRelacional);
-                    buffer += c;
-                    archivo.Read();
-                }
-                if ((c = (char)archivo.Peek()) == '>')
-                {
-                    setClasificacion(Tipos.OperadorRelacional);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == '=')
-            {
-                setClasificacion(Tipos.OperadorTermino);
-                if ((c = (char)archivo.Peek()) == '=')
-                {
-                    setClasificacion(Tipos.OperadorRelacional);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == '>')
-            {
-                setClasificacion(Tipos.OperadorRelacional);
-                if ((c = (char)archivo.Peek()) == '=')
-                {
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == '!')
-            {
-                setClasificacion(Tipos.OperadorLogico);
-                if ((c = (char)archivo.Peek()) == '=')
-                {
-                    setClasificacion(Tipos.OperadorLogico);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == '&')
-            {
-                setClasificacion(Tipos.Caracter);
-                if ((c = (char)archivo.Peek()) == '&')
-                {
-                    setClasificacion(Tipos.OperadorLogico);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == '|')
-            {
-                setClasificacion(Tipos.Caracter);
-                if ((c = (char)archivo.Peek()) == '|')
-                {
-                    setClasificacion(Tipos.OperadorLogico);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (char.IsDigit(c))
-            {
-                setClasificacion(Tipos.Numero);
-                while (char.IsDigit(c = (char)archivo.Peek()))
-                {
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == ';')
-            {
-                setClasificacion(Tipos.FinSentencia);
-            }
-            else if (c == '?')
-            {
-                setClasificacion(Tipos.OperadorTernario);
-            }
-            else if (c == '+')
-            {
-                setClasificacion(Tipos.OperadorTermino);
-                if ((c = (char)archivo.Peek()) == '+' || c == '=')
-                {
-                    setClasificacion(Tipos.IncrementoTermino);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == '-')
-            {
-                setClasificacion(Tipos.OperadorTermino);
-                if ((c = (char)archivo.Peek()) == '-' || (c == '='))
-                {
-                    setClasificacion(Tipos.IncrementoTermino);
-                    buffer += c;
-                    archivo.Read();
-                }
-                else if (c == '>')
-                {
-                    setClasificacion(Tipos.OperadorPuntero);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-
-            else if (c == '*' || c == '/' || c == '%')
-            {
-                setClasificacion(Tipos.OperadorFactor);
-            }
-            else if (c == '/')
-            {
-                setClasificacion(Tipos.IncrementoFactor);
-                if ((c = (char)archivo.Peek()) == '/' || c == '=')
-                {
-                    setClasificacion(Tipos.IncrementoFactor);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == '%')
-            {
-                setClasificacion(Tipos.IncrementoFactor);
-                if ((c = (char)archivo.Peek()) == '%' || c == '=')
-                {
-                    setClasificacion(Tipos.IncrementoFactor);
-                    buffer += c;
-                    archivo.Read();
-                }
-            }
-            else if (c == '$')
-            {
-                if ((c = (char)archivo.Peek()) == '$')
-                {
-                    setClasificacion(Tipos.Caracter);
-                }
-                else if (char.IsDigit(c))
-                {
-                    setClasificacion(Tipos.Moneda);
-                    while (char.IsDigit(c = (char)archivo.Peek()))
-                    {
-                        buffer += c;
-                        archivo.Read();
-                    }
-                }
-            }*/
-            else
-            {
-                setClasificacion(Tipos.Caracter);
             }
             if (!finArchivo())
             {
                 setContenido(buffer);
-                string contenido = getContenido();
-                string clasificacion = getClasificacion().ToString();
-
-                // Ajusta el ancho según sea necesario para que quede alineado
-                log.WriteLine($"{contenido,-12} == {clasificacion}");
+                log.WriteLine(getContenido() + " = " + getClasificacion());
             }
-
         }
         public bool finArchivo()
         {
             return archivo.EndOfStream;
         }
+
     }
 }
